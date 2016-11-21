@@ -1,6 +1,6 @@
 # Color Contrast Analyzer for Sketch
 
-This Sketch plugin is based on Florian Schulz's [Color Contrast Analyser] (https://github.com/getflourish/Sketch-Color-Contrast-Analyser).A Sketch plugin that calculates the color contrast of two layers and evaluates it against MCOE's guidelines. If only a single layer is selected, than it will calculate with its artboard background color. The test may pass or fail because of a lack of contrast. And even when you do not need to meet the requirements, you see the actual ratio so you know how far off you are. This might help you design accessible content.
+This Sketch plugin is based on Florian Schulz's [Color Contrast Analyser] (https://github.com/getflourish/Sketch-Color-Contrast-Analyser). It calculates the color contrast of two layers and evaluates them against MCOE's guidelines. If only a single layer is selected, than it will calculate with its artboard background color. The test may pass or fail because of a lack of contrast. When you do not need to meet the requirements, you see the actual ratio so you know how far off you are. This might help you design accessible content.
 
 <img src="./Sketch-Color-Contrast.png" width="450px" alt="Sketch Color Contrast"" />
 
