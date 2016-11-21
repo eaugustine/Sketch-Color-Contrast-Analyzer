@@ -1,0 +1,23 @@
+{
+  "name" : "Color Contrast Analyzer",
+  "identifier" : "com.getflourish.sketch.colorcontrastanalyzer",
+  "version" : "1.2",
+  "description" : "A plugin that calculates the color contrast of two layers and evaluates it against MCOE's guidelines.",
+  "author" : "Florian Schulz | Erica Augustine", 
+  "compatibleVersion": 3,
+  "commands" : [
+  {
+    "script" : "analyzcolor.cocoascript",
+    "handler" : "onRun",
+    "shortcut" : "",
+    "name" : "Color Contrast Analyzer",
+    "identifier" : "analyz-color"
+  }
+  ],
+  "menu": {
+    "isRoot": true,
+    "items": [
+      "analyz-color",
+    ]
+  }
+}

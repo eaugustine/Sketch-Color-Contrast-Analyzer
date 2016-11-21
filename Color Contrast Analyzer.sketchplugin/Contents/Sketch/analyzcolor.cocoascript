@@ -1,0 +1,171 @@
+// Calculates the color contrast of two layers 
+// Read more about the Web Content Accessibility Guidelines 2.0
+// http://www.w3.org/WAI/WCAG20/quickref/#qr-visual-audio-contrast-contrast
+// Read the MCOE Accessibility Guidelines
+// https://confluence.davita.com/display/MCoE/Accessibility
+// Based on these algorithms: http://gmazzocato.altervista.org/colorwheel/algo.php
+// —————————————————————————————————————————
+
+// This plugin expects a selection of two layers or a single layer that will be checked against the artboard’s background color
+
+
+// Reference to the text layer if there is any
+var textLayer = null; 
+var doc = null;
+
+var onRun = function(context) {  
+	doc = context.document;
+  	var selection = context.selection; 
+  	var page = doc.currentPage(); 
+
+	// Setup
+	var app = NSApplication.sharedApplication();
+
+	switch (selection.count()) {
+		case 0:
+			app.displayDialog_withTitle("Please select one or two layers.", "Color Contrast Analyzer");
+		break;
+
+		case 1:
+			var layer1 = selection[0];
+			var color1 = getColorOf(layer1);
+
+			// Get Artboard background color
+
+			if (page.currentArtboard() != null) {
+	
+				color2 = page.currentArtboard().backgroundColor();
+
+				var cr = getColorContrastOf(color1, color2);
+				showResult(cr);
+			} else {
+				app.displayDialog_withTitle("This plugin requires a single layer on an artboard or two selected layers to work.", "Color Contrast Analyzer");
+			}
+
+		break;
+
+		case 2:
+			var layer1 = selection[0];
+			var layer2 = selection[1];
+
+			var color1 = getColorOf(layer1);
+			var color2 = getColorOf(layer2);
+
+			var cr = getColorContrastOf(color1, color2);
+
+			showResult(cr);
+		break;
+	}
+
+
+	function getColorOf(layer) {
+		var color = null;
+		switch ([layer class]) {
+			case MSTextLayer:
+		    	color = layer.textColor();
+				textLayer = layer;
+
+				// Check if text layer has a fill color
+
+				var fill = layer.style().fills().firstObject();
+				if (fill != undefined && fill.isEnabled()) color = fill.color();
+			break;
+		  	default:
+		    	var fill = layer.style().fills().firstObject();
+				color = fill.color();
+		    break;
+		}
+		return color;
+	}
+}
+
+function getColorContrastOf(color1, color2) {
+
+	// Color 1
+
+	L1R = color1.red();
+	if (L1R <= 0.03928) {
+		L1R = color1.red() / 12.92;
+	} else {
+		L1R = Math.pow(((L1R + 0.055)/1.055), 2.4)
+	}
+
+	L1G = color1.green();
+	if (L1G <= 0.03928) {
+		L1G = color1.green() / 12.92;
+	} else {
+		L1G = Math.pow(((L1G + 0.055)/1.055), 2.4)
+	}
+
+	L1B = color1.blue();
+	if (L1B <= 0.03928) {
+		L1B = color1.blue() / 12.92;
+	} else {
+		L1B = Math.pow(((L1B + 0.055)/1.055), 2.4)
+	}
+
+	// Color 2
+
+	L2R = color2.red();
+	if (L2R <= 0.03928) {
+		L2R = color2.red() / 12.92;
+	} else {
+		L2R = Math.pow(((L2R + 0.055)/1.055), 2.4)
+	}
+
+	L2G = color2.green();
+	if (L2G <= 0.03928) {
+		L2G = color2.green() / 12.92;
+	} else {
+		L2G = Math.pow(((L2G + 0.055)/1.055), 2.4)
+	}
+
+	L2B = color2.blue();
+	if (L2B <= 0.03928) {
+		L2B = color2.blue() / 12.92;
+	} else {
+		L2B = Math.pow(((L2B + 0.055)/1.055), 2.4)
+	}
+
+	var L1 = 0.2126 * L1R + 0.7152 * L1G + 0.0722 * L1B;
+	var L2 = 0.2126 * L2R + 0.7152 * L2G + 0.0722 * L2B;
+
+	// Make sure L1 is the lighter color
+
+	if (L1 <= L2) {
+		var temp = L2;
+		L2 = L1;
+		L1 = temp;
+	}
+
+	// Calculate contrast
+
+	cr = ((L1 + 0.05) / (L2 + 0.05)).toFixed(1);
+
+	return cr;
+}
+
+function showResult (cr) {
+	// Check against AA / AAA
+	var result = "❌ Failed MCOE guidelines";
+
+	var fontSize = 14;
+
+	if (textLayer != null) {
+		var fontSize = textLayer.fontSize();
+		var isBold = false;
+
+		if (textLayer.fontPostscriptName().indexOf("Bold") != -1) {
+			var isBold = true;
+		}
+	}
+	if ((fontSize >= 18 || (fontSize >= 14 && isBold)) && cr >=4) result = "✅ Passed MCOE guidelines (large text)"
+	if(cr >= 6) result = "✅ Passed MCOE guidelines"
+
+	if ((fontSize >= 18 || (fontSize >= 14 && isBold)) && cr >=4.5) result = "✅ Exceeded MCOE guidelines (large text)"
+	if(cr >= 7.0) result = "✅ Exceeded MCOE guidelines"
+
+	// Show ratio
+	doc.showMessage(result + " - " + cr + ":1");
+
+}
